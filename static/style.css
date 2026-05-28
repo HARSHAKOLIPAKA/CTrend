@@ -441,3 +441,79 @@ body{
     font-size:90px;
     margin-bottom:20px;
 }
+@media (max-width: 768px) {
+
+    body {
+        overflow: hidden;
+    }
+
+    .app-container {
+        flex-direction: column;
+    }
+
+    /* Sidebar becomes top bar */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 14px;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        overflow-x: auto;
+    }
+
+    .logo-section {
+        display: none;
+    }
+
+    .current-user-card {
+        display: none;
+    }
+
+    .search-box {
+        display: none;
+    }
+
+    .users-list {
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 10px;
+    }
+
+    .user-card {
+        min-width: 140px;
+        flex-shrink: 0;
+    }
+
+    /* Chat takes full screen */
+    .chat-section {
+        height: calc(100vh - 120px);
+    }
+
+    .chat-header {
+        padding: 12px;
+    }
+
+    .chat-messages {
+        padding: 14px;
+    }
+
+    .message-bubble {
+        max-width: 75%;
+        font-size: 14px;
+    }
+
+    .message-input-container {
+        padding: 12px;
+    }
+
+    .message-box {
+        border-radius: 20px;
+    }
+
+    .send-button {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+    }
+}

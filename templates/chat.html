@@ -1,216 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UltraChat V3</title>
 
-    <title>Real Chat</title>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-          rel="stylesheet">
+<style>
+:root{
+    --bg:#0b0f17;
+    --panel:#121826cc;
+    --accent:#7c5cff;
+    --text:#e6e6e6;
+    --muted:#8b90a0;
+}
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:340px;
+    background:var(--panel);
+    backdrop-filter: blur(20px);
+    border-right:1px solid #222;
+    display:flex;
+    flex-direction:column;
+}
+
+.logo{
+    padding:18px;
+    font-size:20px;
+    font-weight:700;
+    color:var(--accent);
+}
+
+.user{
+    display:flex;
+    gap:12px;
+    padding:12px 16px;
+    align-items:center;
+    cursor:pointer;
+    transition:0.2s;
+    border-radius:10px;
+    margin:5px 10px;
+}
+
+.user:hover{
+    background:#1b2233;
+}
+
+.user.active{
+    background:#232a40;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#7c5cff,#00d4ff);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+}
+
+/* CHAT */
+.chat{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.header{
+    padding:15px 20px;
+    background:var(--panel);
+    backdrop-filter: blur(20px);
+    border-bottom:1px solid #222;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.status{
+    font-size:12px;
+    color:#4ade80;
+}
+
+/* MESSAGES */
+.messages{
+    flex:1;
+    padding:20px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.msg{
+    max-width:65%;
+    padding:10px 14px;
+    border-radius:14px;
+    font-size:14px;
+    animation:pop 0.2s ease;
+    position:relative;
+}
+
+@keyframes pop{
+    from{transform:scale(0.95);opacity:0}
+    to{transform:scale(1);opacity:1}
+}
+
+.sent{
+    align-self:flex-end;
+    background:linear-gradient(135deg,var(--accent),#4f46e5);
+}
+
+.received{
+    align-self:flex-start;
+    background:#1b2233;
+}
+
+/* INPUT */
+.input-area{
+    display:flex;
+    padding:12px;
+    background:var(--panel);
+    border-top:1px solid #222;
+    gap:10px;
+}
+
+.input-area input{
+    flex:1;
+    padding:12px;
+    border:none;
+    outline:none;
+    border-radius:10px;
+    background:#1b2233;
+    color:white;
+}
+
+button{
+    padding:12px 16px;
+    border:none;
+    border-radius:10px;
+    background:var(--accent);
+    color:white;
+    cursor:pointer;
+}
+
+/* TYPING */
+.typing{
+    font-size:12px;
+    color:var(--muted);
+    padding-left:20px;
+    height:20px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="app-container">
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="logo">⚡ UltraChat V3</div>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
+    {% for user in users %}
+    <a href="/chat?user={{ user[0] }}"
+       class="user {% if selected_user == user[0] %}active{% endif %}">
 
-        <div class="logo-section">
-            <div class="logo-icon">💬</div>
-            <h2>Real Chat</h2>
+        <div class="avatar">{{ user[0][0].upper() }}</div>
+
+        <div>
+            <div style="font-weight:600">{{ user[0] }}</div>
+            <div style="font-size:12px;color:#888">online</div>
         </div>
 
-        <!-- Current User -->
-        <div class="current-user-card">
+    </a>
+    {% endfor %}
+</div>
 
-            <div class="avatar large-avatar">
-                {{ username[0].upper() }}
-            </div>
+<!-- CHAT -->
+<div class="chat">
 
-            <div class="user-info">
-                <h3>{{ username }}</h3>
-
-                <div class="status-row">
-                    <span class="status-dot"></span>
-                    <span>Online</span>
-                </div>
-            </div>
-
+    <div class="header">
+        <div>
+            <b>{{ selected_user or "Select chat" }}</b>
         </div>
+        <div class="status">● Online</div>
+    </div>
 
-        <!-- Search -->
-        <div class="search-box">
-            <input type="text"
-                   placeholder="Search users...">
+    <div class="messages" id="messages">
+
+        {% for msg in messages %}
+        <div class="msg {% if msg[0]==username %}sent{% else %}received{% endif %}">
+            {{ msg[1] }}
         </div>
+        {% endfor %}
 
-        <!-- User List -->
-        <div class="users-section">
+    </div>
 
-            <div class="section-title">
-                MESSAGES
-            </div>
+    <div class="typing" id="typing"></div>
 
-            <div class="users-list">
-
-                {% for user in users %}
-
-                <a href="/chat?user={{ user[0] }}"
-                   class="user-card
-                   {% if selected_user == user[0] %}
-                   active-user
-                   {% endif %}">
-
-                    <div class="avatar user-avatar">
-                        {{ user[0][0].upper() }}
-
-                        <span class="mini-online-dot">
-                        </span>
-                    </div>
-
-                    <div class="user-text">
-                        <h4>{{ user[0] }}</h4>
-                        <p>Active now</p>
-                    </div>
-
-                </a>
-
-                {% endfor %}
-
-            </div>
-        </div>
-
-        <!-- Logout -->
-        <a href="/logout"
-           class="logout-btn">
-            Logout
-        </a>
-
-    </aside>
-
-    <!-- CHAT AREA -->
-    <main class="chat-section">
-
-        {% if selected_user %}
-
-        <!-- Header -->
-        <div class="chat-header">
-
-            <div class="chat-user-info">
-
-                <div class="avatar header-avatar">
-                    {{ selected_user[0].upper() }}
-
-                    <span class="mini-online-dot">
-                    </span>
-                </div>
-
-                <div>
-                    <h3>{{ selected_user }}</h3>
-                    <p>Online</p>
-                </div>
-
-            </div>
-
-            <div class="chat-actions">
-                🔍
-            </div>
-
-        </div>
-
-        <!-- Messages -->
-        <div class="chat-messages"
-             id="messages">
-
-            {% for msg in messages %}
-
-            <div class="message-wrapper
-                {% if msg[0] == username %}
-                sent
-                {% else %}
-                received
-                {% endif %}
-            ">
-
-                <div class="message-bubble">
-
-                    <div class="message-user">
-                        {{ msg[0] }}
-                    </div>
-
-                    <div class="message-text">
-                        {{ msg[1] }}
-                    </div>
-
-                    <div class="message-time">
-                        {{ msg[2] }}
-                    </div>
-
-                </div>
-
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-        <!-- Message Input -->
-        <div class="message-input-container">
-
-            <div class="message-box">
-
-                <input type="text"
-                       id="message"
-                       placeholder="Message {{ selected_user }}">
-
-                <button onclick="sendMessage()"
-                        class="send-button">
-                    ➤
-                </button>
-
-            </div>
-
-        </div>
-
-        {% else %}
-
-        <!-- Empty State -->
-        <div class="empty-chat">
-
-            <div class="empty-icon">
-                💬
-            </div>
-
-            <h2>Select a chat</h2>
-
-            <p>
-                Choose a person from the sidebar
-                and start messaging.
-            </p>
-
-        </div>
-
-        {% endif %}
-
-    </main>
+    <div class="input-area">
+        <input id="message" placeholder="Type message..." onkeypress="handleKey(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
 
 </div>
 
 <script>
-    const selectedUser =
-        "{{ selected_user or '' }}";
+const selectedUser = "{{ selected_user or '' }}";
+
+function sendMessage(){
+    let input = document.getElementById("message");
+    if(!input.value.trim()) return;
+
+    // send via your socket function
+    socket.emit("message", {
+        to: selectedUser,
+        msg: input.value
+    });
+
+    input.value = "";
+}
+
+function handleKey(e){
+    if(e.key === "Enter") sendMessage();
+}
+
+/* AUTO SCROLL */
+const box = document.getElementById("messages");
+setInterval(()=>{
+    box.scrollTop = box.scrollHeight;
+},300);
 </script>
 
-<script src="{{ url_for('static',
-filename='script.js') }}">
-</script>
+<script src="{{ url_for('static','script.js') }}"></script>
 
 </body>
 </html>

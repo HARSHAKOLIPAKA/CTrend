@@ -1,51 +1,30 @@
 const socket = io();
 
-// elements
-const chatMessages = document.querySelector(".chat-messages");
-const input = document.querySelector(".message-box input");
-const sendBtn = document.querySelector(".send-button");
+function send(){
+    const input = document.getElementById("msg");
+    if(!input.value.trim()) return;
 
-// add message to UI
-function addMessage(text, type = "sent") {
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("message-wrapper", type);
+    socket.emit("message",{
+        to:selectedUser,
+        msg:input.value
+    });
 
-    const bubble = document.createElement("div");
-    bubble.classList.add("message-bubble");
-
-    bubble.innerHTML = `
-        <div class="message-user">${type === "sent" ? "You" : "User"}</div>
-        <div class="message-text">${text}</div>
-    `;
-
-    wrapper.appendChild(bubble);
-    chatMessages.appendChild(wrapper);
-
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    input.value="";
 }
 
-// send message
-function sendMessage() {
-    const msg = input.value.trim();
-    if (!msg) return;
+socket.on("message",(data)=>{
+    const box=document.getElementById("messages");
 
-    addMessage(msg, "sent");
-    socket.send(msg);
+    const div=document.createElement("div");
+    div.className="msg recv";
+    div.innerText=data.msg;
 
-    input.value = "";
-}
-
-// receive message from server
-socket.on("message", (msg) => {
-    addMessage(msg, "received");
+    box.appendChild(div);
+    box.scrollTop=box.scrollHeight;
 });
 
-// click send
-sendBtn.addEventListener("click", sendMessage);
-
-// press Enter
-input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-        sendMessage();
-    }
-});
+/* AUTO SCROLL */
+setInterval(()=>{
+    const box=document.getElementById("messages");
+    if(box) box.scrollTop=box.scrollHeight;
+},300);

@@ -1,168 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Login • Legend</title>
 
-    <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:'Poppins',sans-serif;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        body{
-            height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            background:linear-gradient(135deg,#667eea,#764ba2);
-        }
+<style>
+*{
+    margin:0;
+    padding:0;
+    font-family:Inter;
+    box-sizing:border-box;
+}
 
-        .container{
-            width:380px;
-            background:#fff;
-            border-radius:25px;
-            padding:40px 30px;
-            box-shadow:0 20px 50px rgba(0,0,0,.2);
-        }
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#05070d;
+    overflow:hidden;
+    color:white;
+}
 
-        .title{
-            text-align:center;
-            margin-bottom:30px;
-        }
+/* glowing animated background */
+.bg{
+    position:absolute;
+    width:200%;
+    height:200%;
+    background:
+        radial-gradient(circle at 20% 20%, #7c5cff, transparent 35%),
+        radial-gradient(circle at 80% 30%, #00d4ff, transparent 40%),
+        radial-gradient(circle at 50% 80%, #4f46e5, transparent 45%);
+    filter: blur(70px);
+    animation: float 12s infinite alternate ease-in-out;
+}
 
-        .title h1{
-            color:#333;
-            font-size:32px;
-        }
+@keyframes float{
+    from{transform:translate(-10%,-10%) scale(1);}
+    to{transform:translate(10%,10%) scale(1.1);}
+}
 
-        .title p{
-            color:gray;
-            font-size:14px;
-        }
+/* floating particles */
+.particle{
+    position:absolute;
+    width:6px;
+    height:6px;
+    background:white;
+    border-radius:50%;
+    opacity:0.2;
+    animation: rise 8s infinite linear;
+}
 
-        .input-box{
-            margin-bottom:20px;
-        }
+@keyframes rise{
+    from{transform:translateY(100vh); opacity:0;}
+    to{transform:translateY(-20vh); opacity:1;}
+}
 
-        .input-box label{
-            display:block;
-            margin-bottom:8px;
-            font-size:14px;
-            color:#444;
-        }
+.card{
+    position:relative;
+    z-index:2;
+    width:380px;
+    padding:30px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.06);
+    backdrop-filter: blur(25px);
+    border:1px solid rgba(255,255,255,0.12);
+    box-shadow:0 30px 80px rgba(0,0,0,0.6);
+    animation: pop 0.6s ease;
+}
 
-        .input-box input{
-            width:100%;
-            padding:15px;
-            border:none;
-            border-radius:12px;
-            background:#f1f1f1;
-            outline:none;
-            font-size:15px;
-        }
+@keyframes pop{
+    from{transform:scale(0.9);opacity:0;}
+    to{transform:scale(1);opacity:1;}
+}
 
-        .input-box input:focus{
-            border:2px solid #667eea;
-            background:#fff;
-        }
+h2{
+    text-align:center;
+    margin-bottom:20px;
+    font-size:22px;
+    background:linear-gradient(135deg,#7c5cff,#00d4ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
 
-        .btn{
-            width:100%;
-            padding:15px;
-            border:none;
-            border-radius:14px;
-            background:#667eea;
-            color:white;
-            font-size:16px;
-            font-weight:600;
-            cursor:pointer;
-            transition:.3s;
-        }
+input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    background:#111827;
+    color:white;
+    transition:0.2s;
+}
 
-        .btn:hover{
-            background:#5a67d8;
-        }
+input:focus{
+    outline:2px solid #7c5cff;
+}
 
-        .bottom{
-            text-align:center;
-            margin-top:20px;
-            font-size:14px;
-        }
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(135deg,#7c5cff,#00d4ff);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.2s;
+}
 
-        .bottom a{
-            color:#667eea;
-            text-decoration:none;
-            font-weight:600;
-        }
+button:hover{
+    transform:scale(1.04);
+}
 
-        .flash{
-            background:#ffeded;
-            color:red;
-            padding:12px;
-            border-radius:10px;
-            margin-bottom:15px;
-            text-align:center;
-        }
-
-        @media(max-width:420px){
-            .container{
-                width:90%;
-            }
-        }
-    </style>
+.hint{
+    font-size:12px;
+    color:#9ca3af;
+    text-align:center;
+    margin-top:10px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="container">
+<div class="bg"></div>
 
-    <div class="title">
-        <h1>Welcome Back 👋</h1>
-        <p>Login to continue chatting</p>
-    </div>
+<!-- particles -->
+<script>
+for(let i=0;i<25;i++){
+    let p = document.createElement("div");
+    p.className="particle";
+    p.style.left=Math.random()*100+"vw";
+    p.style.animationDuration=(5+Math.random()*5)+"s";
+    document.body.appendChild(p);
+}
+</script>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="flash">
-                {{ messages[0] }}
-            </div>
-        {% endif %}
-    {% endwith %}
+<div class="card">
+    <h2>⚡ Welcome Back</h2>
 
     <form method="POST">
-
-        <div class="input-box">
-            <label>Username</label>
-            <input type="text"
-                   name="username"
-                   placeholder="Enter username"
-                   required>
-        </div>
-
-        <div class="input-box">
-            <label>Password</label>
-            <input type="password"
-                   name="password"
-                   placeholder="Enter password"
-                   required>
-        </div>
-
-        <button class="btn" type="submit">
-            Login
-        </button>
-
+        <input name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
     </form>
 
-    <div class="bottom">
-        Don't have an account?
-        <a href="/register">Register</a>
+    <div class="hint">
+        New here? <a href="/register" style="color:#00d4ff">Create account</a>
     </div>
-
 </div>
 
 </body>

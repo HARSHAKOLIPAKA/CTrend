@@ -1,258 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
+{% block title %}Chat{% endblock %}
 
-<title>UltraChat V3</title>
+{% block content %}
 
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<div class="layout">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
 
-<style>
-:root{
-    --bg:#0b0f17;
-    --panel:#121826cc;
-    --accent:#7c5cff;
-    --text:#e6e6e6;
-    --muted:#8b90a0;
-}
+        <div class="brand">⚡ GOD CHAT</div>
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Inter;
-}
+        {% for user in users %}
+        <a href="/chat?user={{ user[0] }}"
+           class="user {% if selected_user==user[0] %}active{% endif %}">
 
-body{
-    background:var(--bg);
-    color:var(--text);
-    display:flex;
-    height:100vh;
-    overflow:hidden;
-}
+            <div class="avatar">{{ user[0][0] }}</div>
 
-/* SIDEBAR */
-.sidebar{
-    width:340px;
-    background:var(--panel);
-    backdrop-filter: blur(20px);
-    border-right:1px solid #222;
-    display:flex;
-    flex-direction:column;
-}
+            <div class="meta">
+                <div class="name">{{ user[0] }}</div>
+                <div class="status">online</div>
+            </div>
 
-.logo{
-    padding:18px;
-    font-size:20px;
-    font-weight:700;
-    color:var(--accent);
-}
-
-.user{
-    display:flex;
-    gap:12px;
-    padding:12px 16px;
-    align-items:center;
-    cursor:pointer;
-    transition:0.2s;
-    border-radius:10px;
-    margin:5px 10px;
-}
-
-.user:hover{
-    background:#1b2233;
-}
-
-.user.active{
-    background:#232a40;
-}
-
-.avatar{
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    background:linear-gradient(135deg,#7c5cff,#00d4ff);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-}
-
-/* CHAT */
-.chat{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-}
-
-.header{
-    padding:15px 20px;
-    background:var(--panel);
-    backdrop-filter: blur(20px);
-    border-bottom:1px solid #222;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.status{
-    font-size:12px;
-    color:#4ade80;
-}
-
-/* MESSAGES */
-.messages{
-    flex:1;
-    padding:20px;
-    overflow-y:auto;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.msg{
-    max-width:65%;
-    padding:10px 14px;
-    border-radius:14px;
-    font-size:14px;
-    animation:pop 0.2s ease;
-    position:relative;
-}
-
-@keyframes pop{
-    from{transform:scale(0.95);opacity:0}
-    to{transform:scale(1);opacity:1}
-}
-
-.sent{
-    align-self:flex-end;
-    background:linear-gradient(135deg,var(--accent),#4f46e5);
-}
-
-.received{
-    align-self:flex-start;
-    background:#1b2233;
-}
-
-/* INPUT */
-.input-area{
-    display:flex;
-    padding:12px;
-    background:var(--panel);
-    border-top:1px solid #222;
-    gap:10px;
-}
-
-.input-area input{
-    flex:1;
-    padding:12px;
-    border:none;
-    outline:none;
-    border-radius:10px;
-    background:#1b2233;
-    color:white;
-}
-
-button{
-    padding:12px 16px;
-    border:none;
-    border-radius:10px;
-    background:var(--accent);
-    color:white;
-    cursor:pointer;
-}
-
-/* TYPING */
-.typing{
-    font-size:12px;
-    color:var(--muted);
-    padding-left:20px;
-    height:20px;
-}
-</style>
-</head>
-
-<body>
-
-<!-- SIDEBAR -->
-<div class="sidebar">
-    <div class="logo">⚡ UltraChat V3</div>
-
-    {% for user in users %}
-    <a href="/chat?user={{ user[0] }}"
-       class="user {% if selected_user == user[0] %}active{% endif %}">
-
-        <div class="avatar">{{ user[0][0].upper() }}</div>
-
-        <div>
-            <div style="font-weight:600">{{ user[0] }}</div>
-            <div style="font-size:12px;color:#888">online</div>
-        </div>
-
-    </a>
-    {% endfor %}
-</div>
-
-<!-- CHAT -->
-<div class="chat">
-
-    <div class="header">
-        <div>
-            <b>{{ selected_user or "Select chat" }}</b>
-        </div>
-        <div class="status">● Online</div>
-    </div>
-
-    <div class="messages" id="messages">
-
-        {% for msg in messages %}
-        <div class="msg {% if msg[0]==username %}sent{% else %}received{% endif %}">
-            {{ msg[1] }}
-        </div>
+        </a>
         {% endfor %}
 
     </div>
 
-    <div class="typing" id="typing"></div>
+    <!-- CHAT -->
+    <div class="chat">
 
-    <div class="input-area">
-        <input id="message" placeholder="Type message..." onkeypress="handleKey(event)">
-        <button onclick="sendMessage()">Send</button>
+        <div class="header">
+            <div>
+                <b>{{ selected_user or "Select chat" }}</b>
+                <div class="typing" id="typing"></div>
+            </div>
+        </div>
+
+        <div class="messages" id="messages">
+
+            {% for msg in messages %}
+            <div class="msg {% if msg[0]==username %}sent{% else %}recv{% endif %}">
+                {{ msg[1] }}
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="input">
+            <input id="msg" placeholder="Type message..."
+                   onkeypress="if(event.key==='Enter')send()">
+
+            <button onclick="send()">➤</button>
+        </div>
+
     </div>
 
 </div>
 
 <script>
-const selectedUser = "{{ selected_user or '' }}";
-
-function sendMessage(){
-    let input = document.getElementById("message");
-    if(!input.value.trim()) return;
-
-    // send via your socket function
-    socket.emit("message", {
-        to: selectedUser,
-        msg: input.value
-    });
-
-    input.value = "";
-}
-
-function handleKey(e){
-    if(e.key === "Enter") sendMessage();
-}
-
-/* AUTO SCROLL */
-const box = document.getElementById("messages");
-setInterval(()=>{
-    box.scrollTop = box.scrollHeight;
-},300);
+const selectedUser = "{{ selected_user }}";
 </script>
 
-<script src="{{ url_for('static','script.js') }}"></script>
-
-</body>
-</html>
+{% endblock %}
